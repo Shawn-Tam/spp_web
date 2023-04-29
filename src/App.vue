@@ -6,11 +6,9 @@
 </template>
 
 <script>
-import Home from '@/views/HomeView.vue'
 import TopBar from '@/components/TopBar.vue'
 export default {
   components: {
-    Home,
     TopBar
   }
 }
