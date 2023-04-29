@@ -8,13 +8,18 @@ export default new VueRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
+      component: () => import('../views/home.vue'),
       redirect: 'home'
     },
     {
       path: '/home',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
+      component: () => import('../views/home.vue'),
+    },
+    {
+      path: '/task',
+      name: 'task',
+      component: () => import('../views/task.vue'),
     },
     {
       path: '/login',
@@ -23,11 +28,3 @@ export default new VueRouter({
     },
   ]
 })
-
-// const router = new VueRouter({
-//   mode: 'history',
-//   base: process.env.BASE_URL,
-//   routes
-// })
-
-// export default router
