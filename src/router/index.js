@@ -7,8 +7,8 @@ export default new VueRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('../views/home.vue'),
+      name: 'login',
+      component: () => import('../views/Login.vue'),
     },
     {
       path: '/home',
