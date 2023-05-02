@@ -9,7 +9,6 @@ export default new VueRouter({
       path: '/',
       name: 'home',
       component: () => import('../views/home.vue'),
-      redirect: 'home'
     },
     {
       path: '/home',

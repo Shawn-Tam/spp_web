@@ -30,15 +30,21 @@
             stripe
             style="width: 100%"
           >
-            <el-table-column prop="date" label="日期" width="180">
-            </el-table-column>
-            <el-table-column prop="name" label="姓名" width="180">
-            </el-table-column>
-            <el-table-column prop="address" label="地址"> </el-table-column>
+            <el-table-column prop="name" label="名称" width="180"></el-table-column>
+            <el-table-column prop="description" label="描述" width="240"> </el-table-column>
+            <el-table-column prop="startTime" label="开始日期" width="180"></el-table-column>
+            <el-table-column prop="endTime" label="截止日期" width="180"></el-table-column>
             <el-table-column fixed="right" label="操作" width="120">
               <template slot-scope="scope">
                 <el-button
-                  @click.native.prevent="deleteRow(scope.$index, tableData)"
+                  @click.native.prevent="beginTask(scope.row.ID)"
+                  type="text"
+                  size="small"
+                >
+                  开始
+                </el-button>
+                <el-button
+                  @click.native.prevent="submitTask(scope.row.ID)"
                   type="text"
                   size="small"
                 >
@@ -53,10 +59,10 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="pageSize"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="400"
+            :total="total"
           >
           </el-pagination>
         </div>
@@ -66,150 +72,101 @@
 </template>
 
 <script>
+import { getExamTaskList, getExamUserTaskList, submitExamTask } from '@/serve/api'
 export default {
   data() {
     return {
+      total: 0,
+      currentPage: 1,
+      pageSize: 10,
       tableData: [
         {
-          date: "2016-05-03",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
+          name: "作业1",
+          description: "",
+          startTime: "",
+          endTime: ""
+        }
       ],
       taskItem: [
         {
           id: "zuoye",
-          title: "作业",
+          title: "我的作业",
         },
         {
-          id: "kaoshi",
-          title: "考试",
+          id: "chengji",
+          title: "我的成绩",
         },
       ],
       selected: "zuoye",
-      breadTitle: "作业",
-      currentPage: 6,
+      breadTitle: "我的作业",
     };
+  },
+  created(){
+    this.getTableData()
   },
   methods: {
     handleTask(item) {
-      console.log(item);
       this.selected = item.id;
       this.breadTitle = item.title;
+      this.getTableData()
     },
+    getTableData() {
+      if (this.selected == "zuoye") {
+        getExamTaskList({
+          page: this.currentPage,
+          pageSize: this.pageSize,
+        }).then( res => {
+          console.log(res);
+          console.log(res.data.total);
+          this.tableData = res.data.list
+          this.tableData.forEach(item => {
+            item.startTime = this.formatDate(item.startTime);
+            item.endTime = this.formatDate(item.endTime);
+          });
+          this.total = res.data.total
+        })
+      } else {
+        getExamUserTaskList({
+          page: this.currentPage,
+          pageSize: this.pageSize,
+        }).then( res => {
+          console.log(res);
+          this.tableData = res.data.list
+          this.tableData.forEach(item => {
+            item.startTime = this.formatDate(item.startTime);
+            item.endTime = this.formatDate(item.endTime);
+          });
+          this.total = res.data.total
+        })
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+      this.pageSize = val
+      this.getTableData()
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      this.currentPage = val
+      this.getTableData()
     },
+    beginTask(id){
+      console.log(id);
+    },
+    submit(id) {
+      submitExamTask({taskId: id}).then(res => {
+        console.log(res);
+      })
+    }
   },
 };
 </script>

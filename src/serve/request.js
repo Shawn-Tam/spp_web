@@ -1,48 +1,45 @@
-import axios from 'axios';
-import { Message } from "element-ui";
-// 123.57.20.104:8888
+import axios from 'axios'
+import { Message } from 'element-ui'
+
+// Helper function to get the token from somewhere (e.g. localStorage, cookies)
+function getToken() {
+  // Replace this line with the actual implementation to get the token
+  return localStorage.getItem('token')
+}
+
 const service = axios.create({
   baseURL: 'http://123.57.20.104:8888',
   timeout: 9000
 })
 
-// request拦截器
-service.interceptors.request.use( 
+// Request interceptors
+service.interceptors.request.use(
   (config) => {
-    if (getToken()) {
-      config.headers["x-token"] = getToken(); // 让每个请求携带自定义token 请根据实际情况自行修改
-      console.log("axios Cookies getToken Success", getToken())
-    }else{
-      console.log("axios Cookies getToken Err",getToken())
+    const token = getToken()
+    if (token) {
+      config.headers['x-token'] = token
+      console.log('axios Cookies getToken Success', token)
+    } else {
+      console.log('axios Cookies getToken Err', token)
     }
     config.headers['Content-Type'] = 'application/json'
     return config
   },
   (error) => {
-    console.log(error);
-    // Promise.reject(error);
+    console.log(error)
+    Promise.reject(error)
   }
 )
 
+// Response interceptors
 service.interceptors.response.use(
-  (res => {
-    if (typeof res.data !== 'object') {
-     Message.error('服务端异常！');
-      // return Promise.reject(res);
-    }
-    if (res.data.resultCode != 200) {
-      if (res.data.message) Toast.fail(res.data.message);
-      if (res.data.resultCode == 416) {
-        window.vRouter.push({
-          path: '/login'
-        });
-      }
-    }
-    return res.data;
-  }),
-  (error) => {
+  res => {
+    return res.data
+  },
+  error => {
+    Message.error('请求失败，请稍后再试')
+    return Promise.reject(error)
   }
 )
 
 export default service
-
